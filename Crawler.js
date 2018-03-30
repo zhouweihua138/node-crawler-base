@@ -23,11 +23,13 @@ Crawler.prototype.initCrawlerWithSeeds = function(seeds){
   }
 };
 
+let downLoadingImg = false;
+
 // 抓取
 function crawl(){
   // 循环条件：待抓取的链接不空且抓取的网页不多于1000
   //while(!linkQueue.unVisitedUrlsEmpty() && linkQueue.getVisitedUrlNum() <= 10){
-  if(!linkQueue.unVisitedUrlsEmpty() && linkQueue.getVisitedUrlNum() <= 1){
+  if(!linkQueue.unVisitedUrlsEmpty() && linkQueue.getVisitedUrlNum() <= 1000){
     // 队头URL出队列
     let visitUrl = linkQueue.unVisitedUrlDeQueue();
     console.log(new Date().toLocaleString() + " 正在抓取：" + visitUrl);
@@ -38,10 +40,16 @@ function crawl(){
     let downLoadFile = new DownLoadFile();
     //// 下载网页
     //downLoadFile.downloadFile(visitUrl);
+    //downLoadFile.downloadFileOld(visitUrl);
+
+    htmlParserTool.extractArticle(visitUrl,function(data){
+      downLoadFile.saveArticle(data.title+data.content, data.title + new Date().getTime() + '.txt');
+    })
 
     // 该url 放入到已访问的URL中
     linkQueue.addVisitedUrl(visitUrl);
 
+    /*
     // 获得图片地址
     htmlParserTool.extractImgSrcs(visitUrl, function(srcs){
       for(let i=0; i< srcs.length; i++){
@@ -53,8 +61,10 @@ function crawl(){
           console.log("图片地址处理失败：" + err.message);
         }
       }
-      downLoadImg();
+      !downLoadingImg && downLoadImg();
+      downLoadingImg = true;
     });
+    */
 
     // 提取出下载网页中的 URL
     htmlParserTool.extractLinks(visitUrl, function(links){
@@ -75,22 +85,24 @@ function crawl(){
 
 // 抓取图片
 function downLoadImg() {
+  console.log("=========下载图片========");
   console.log(imgQueue.getUnVisitedUrl().toString());
   // 循环条件：待抓取的链接不空且抓取的图片不多于1000
-  if (!imgQueue.unVisitedUrlsEmpty() && imgQueue.getVisitedUrlNum() <= 0) {
+  if (!imgQueue.unVisitedUrlsEmpty() && imgQueue.getVisitedUrlNum() <= 1000) {
     // 队头URL出队列
     let visitUrl = imgQueue.unVisitedUrlDeQueue();
     console.log(new Date().toLocaleString() + " 正在下载：" + visitUrl);
 
     let downLoadFile = new DownLoadFile();
-    downLoadFile.downloadFile(visitUrl);
+    downLoadFile.downloadImg(visitUrl).then(function(data){
+      console.log(data);
+      downLoadImg();
+    });
 
     // 该url 放入到已访问的URL中
     imgQueue.addVisitedUrl(visitUrl);
 
     console.log(imgQueue.getVisitedUrlNum());
-
-    // downLoadImg();
   }
 }
 

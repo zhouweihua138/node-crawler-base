@@ -17,12 +17,11 @@ HtmlParserTool.prototype.extractLinks = function(url, cb){
     let links = [];
     try {
       const $ = cheerio.load(htmlDoc);
-      for(let i=0; i< $(".picBox .right").length; i++){
-        links.push("http://photo.fengniao.com" + $(".picBox .right").eq(i).attr("href"));
+      for(let i=0; i< $("a").length; i++){
+        if($("a").eq(i).attr("href").indexOf('..') < 0){
+          links.push("http://www.purepen.com/sgyy/" + $("a").eq(i).attr("href"));
+        }
       }
-      //for(let i=0; i< $("frame").length; i++) {
-      //  links.push($("frame").attr("src"));
-      //}
       cb && setImmediate(cb, links, this);
     }catch(err){
       console.log(err.message);
@@ -44,6 +43,23 @@ HtmlParserTool.prototype.extractImgSrcs = function(url, cb){
       //  links.push($("frame").attr("src"));
       //}
       cb && setImmediate(cb, srcs, this);
+    }catch(err){
+      console.log(err.message);
+    }
+  });
+};
+
+// 获取文章信息
+HtmlParserTool.prototype.extractArticle = function(url, cb){
+  let downLoadFile = new DownLoadFile();
+  downLoadFile.getHtmlDoc(url, function(htmlDoc){
+    try {
+      const $ = cheerio.load(htmlDoc);
+      let article = {
+        title:$('b').text(),
+        content: $('pre>font').text()
+      };
+      cb && setImmediate(cb, article, this);
     }catch(err){
       console.log(err.message);
     }

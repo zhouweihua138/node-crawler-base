@@ -5,4 +5,4 @@
 const Crawler = require("./Crawler");
 
 let crawler = new Crawler();
-crawler.crawling(["http://photo.fengniao.com/pic_40633512.html"]);
+crawler.crawling(["http://www.purepen.com/sgyy/index.htm"]);
